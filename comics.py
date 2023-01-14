@@ -15,41 +15,34 @@ def main():
     actual_version_API = '5.131'
     file_name = 'image.png'
     try:
-        caption = get_comics()
+        comics_caption = download_random_comics()
         try:
-            post_wall_photo(vk_access_token, vk_group_id, actual_version_API, file_name, caption)
+            post_wall_photo(vk_access_token, vk_group_id, actual_version_API, file_name, comics_caption)
         except requests.exceptions.HTTPError:
             print('Ошибка опубликования комикса')
     except requests.exceptions.HTTPError:
         print('Ошибка загрузки комикса')
 
 
-def get_num_comics():
+def download_random_comics():
 
     url = 'https://xkcd.com/info.0.json'
     response = requests.get(url)
     response.raise_for_status()
-    return response.json()['num']
-
-
-def get_comics():
-
-    comics_number = randint(1, get_num_comics())
+    total_comics = response.json()['num']
+    comics_number = randint(1, total_comics)
     url = f'https://xkcd.com/{comics_number}/info.0.json'
     response = requests.get(url)
     response.raise_for_status()  
-    get_image(response.json()['img'])
-
-    return response.json()['alt'] 
-
-
-def get_image(url):
-
-    response = requests.get(url)
+    comics_link = response.json()['img']
+    comics_caption = response.json()['alt']
+    response = requests.get(comics_link)
     response.raise_for_status()
     file_name = Path().cwd() / 'image.png'    
     with open(file_name, 'wb') as file:
         file.write(response.content)
+
+    return comics_caption 
 
 
 def get_url_vk_group(vk_access_token, vk_group_id, version_API, file_name):
