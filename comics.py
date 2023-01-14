@@ -45,7 +45,7 @@ def download_random_comics():
     return comics_caption 
 
 
-def get_url_vk_group(vk_access_token, vk_group_id, version_API, file_name):
+def get_upload_vk_server_url(vk_access_token, vk_group_id, version_API, file_name):
 
     
     url = 'https://api.vk.com/method/photos.getWallUploadServer'
@@ -71,21 +71,10 @@ def print_error_msg(response, file_name):
     exit() 
 
 
-
-def upload_comics_file(vk_access_token, vk_group_id, version_API, file_name):
-    with open(file_name, 'rb') as file:
-        url = get_url_vk_group(vk_access_token, vk_group_id, version_API, file_name)
-        files = {
-            'photo': file
-        }
-        response = requests.post(url, files=files)
-    return response
-
-
 def upload_wall_photos(vk_access_token, vk_group_id, version_API, file_name):
     
     with open(file_name, 'rb') as file:
-        url = get_url_vk_group(vk_access_token, vk_group_id, version_API, file_name)
+        url = get_upload_vk_server_url(vk_access_token, vk_group_id, version_API, file_name)
         files = {
             'photo': file
         }
