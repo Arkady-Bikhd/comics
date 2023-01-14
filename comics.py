@@ -75,7 +75,7 @@ def print_error_msg(response, file_name):
     exit() 
 
 
-def upload_wall_photos(vk_access_token, vk_group_id, api_version, file_name):
+def upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name):
     
     with open(file_name, 'rb') as file:
         url = get_upload_vk_server_url(vk_access_token, vk_group_id, api_version, file_name)
@@ -98,7 +98,7 @@ def save_wall_photo(vk_access_token, vk_group_id,  api_version, file_name):
 
     url = 'https://api.vk.com/method/photos.saveWallPhoto'  
     
-    upload_photo_response = upload_wall_photos(vk_access_token, vk_group_id, api_version, file_name)    
+    upload_photo_response = upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name)    
     payloads = {
         'access_token': vk_access_token,         
         'group_id': vk_group_id,
