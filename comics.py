@@ -45,6 +45,10 @@ def download_random_comics():
     return comics_caption 
 
 
+def delete_image_file(file_name):
+    Path(file_name).unlink() 
+
+
 def get_upload_vk_server_url(vk_access_token, vk_group_id, api_version, file_name):
 
     
@@ -64,8 +68,8 @@ def get_upload_vk_server_url(vk_access_token, vk_group_id, api_version, file_nam
         
 
 def print_error_msg(response, file_name):
-
-    Path(file_name).unlink() 
+    
+    delete_image_file(file_name)
     print('Ошибка. Описание:')
     print(response['error']['error_msg'])
     exit() 
@@ -132,9 +136,8 @@ def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, captio
     post_wall_photo_response = response.json()
     if 'error' in post_wall_photo_response:
         print_error_msg(post_wall_photo_response, file_name)
-    Path(file_name).unlink()
-         
-
+    delete_image_file(file_name)
+       
 
 if __name__ == "__main__":
     main()
