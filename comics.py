@@ -71,49 +71,55 @@ def print_error_msg(response, file_name):
     
     delete_image_file(file_name)
     print('Ошибка. Описание:')
-    print(response['error']['error_msg'])
-    exit() 
+    print(response['error']['error_msg'])    
+
+
+def upload_comic_file(url, file_name):
+    
+    with open(file_name, 'rb') as file:
+            files = {
+                'photo': file
+            }
+            response = requests.post(url, files=files)
+    response.raise_for_status()
+    return response
 
 
 def upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name):
     
-    with open(file_name, 'rb') as file:
-        url = get_upload_vk_server_url(vk_access_token, vk_group_id, api_version, file_name)
-        files = {
-            'photo': file
-        }
-        response = requests.post(url, files=files)
-    response.raise_for_status()
-    upload_wall_photo_response = response.json()
-    if 'error' in upload_wall_photo_response:
-        print_error_msg(upload_wall_photo_response, file_name)
-    elif upload_wall_photo_response['photo'] == '[]':
-        print('Комикс не загружен в группу')
-        exit()
-    else:
-        return upload_wall_photo_response
+    url = get_upload_vk_server_url(vk_access_token, vk_group_id, api_version, file_name)
+    if url:
+        upload_file_response = upload_comic_file(url, file_name)
+        upload_wall_photo_response = upload_file_response.json()
+        if 'error' in upload_wall_photo_response:
+            print_error_msg(upload_wall_photo_response, file_name)
+        elif upload_wall_photo_response['photo'] == '[]':
+            print('Комикс не загружен в группу')        
+        else:
+            return upload_wall_photo_response
                  
 
 def save_wall_photo(vk_access_token, vk_group_id,  api_version, file_name):
 
     url = 'https://api.vk.com/method/photos.saveWallPhoto'  
     
-    upload_photo_response = upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name)    
-    payloads = {
-        'access_token': vk_access_token,         
-        'group_id': vk_group_id,
-        'photo': upload_photo_response['photo'],
-        'server': upload_photo_response['server'],
-        'v': api_version,
-        'hash': upload_photo_response['hash']
-    }
-    response = requests.post(url, params=payloads)
-    response.raise_for_status()
-    save_wall_photo_response = response.json()    
-    if 'error' in save_wall_photo_response:
-        print_error_msg(save_wall_photo_response, file_name)
-    else:
-        return save_wall_photo_response['response']
+    upload_photo_response = upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name)
+    if upload_photo_response:    
+        payloads = {
+            'access_token': vk_access_token,         
+            'group_id': vk_group_id,
+            'photo': upload_photo_response['photo'],
+            'server': upload_photo_response['server'],
+            'v': api_version,
+            'hash': upload_photo_response['hash']
+        }
+        response = requests.post(url, params=payloads)
+        response.raise_for_status()
+        save_wall_photo_response = response.json()    
+        if 'error' in save_wall_photo_response:
+            print_error_msg(save_wall_photo_response, file_name)
+        else:
+            return save_wall_photo_response['response']
 
 
 def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, caption):
@@ -121,22 +127,23 @@ def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, captio
     url = 'https://api.vk.com/method/wall.post'  
     
     save_wall_photo_response = save_wall_photo(vk_access_token, vk_group_id, api_version, file_name)
-    owner_id = save_wall_photo_response[0]['owner_id']
-    media_id = save_wall_photo_response[0]['id']
-    payloads = {
-        'access_token': vk_access_token,         
-        'owner_id': -int(vk_group_id),
-        'from_group': 1,
-        'message': caption,
-        'attachments': f'photo{owner_id}_{media_id}',        
-        'v': api_version,        
-    }
-    response = requests.post(url, params=payloads)
-    response.raise_for_status()
-    post_wall_photo_response = response.json()
-    if 'error' in post_wall_photo_response:
-        print_error_msg(post_wall_photo_response, file_name)
-    delete_image_file(file_name)
+    if save_wall_photo_response:
+        owner_id = save_wall_photo_response[0]['owner_id']
+        media_id = save_wall_photo_response[0]['id']
+        payloads = {
+            'access_token': vk_access_token,         
+            'owner_id': -int(vk_group_id),
+            'from_group': 1,
+            'message': caption,
+            'attachments': f'photo{owner_id}_{media_id}',        
+            'v': api_version,        
+        }
+        response = requests.post(url, params=payloads)
+        response.raise_for_status()
+        post_wall_photo_response = response.json()
+        if 'error' in post_wall_photo_response:
+            print_error_msg(post_wall_photo_response, file_name)
+        delete_image_file(file_name)
        
 
 if __name__ == "__main__":
