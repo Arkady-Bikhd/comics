@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from os import environ
 from pathlib import Path
 from random import randint
-from sys import exit
 from requests.exceptions import HTTPError
 
 
@@ -18,7 +17,7 @@ def main():
     try:
         comic_caption = download_random_comic()
         try:
-            post_wall_photo(vk_access_token, vk_group_id, actual_api_version, file_name, comic_caption)
+            post_comic_in_vk(vk_access_token, vk_group_id, actual_api_version, file_name, comic_caption)
         except HTTPError as err:
             print('Ошибка опубликования комикса')
             print(err.args[0])
@@ -52,7 +51,7 @@ def delete_image_file(file_name):
     Path(file_name).unlink() 
 
 
-def get_upload_vk_server_url(vk_access_token, vk_group_id, api_version, file_name):
+def get_upload_vk_server_url(vk_access_token, vk_group_id, api_version):
 
     
     url = 'https://api.vk.com/method/photos.getWallUploadServer'
@@ -81,9 +80,8 @@ def upload_comic_file(url, file_name):
     return response
 
 
-def upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name):
+def upload_wall_photo(file_name, url):
     
-    url = get_upload_vk_server_url(vk_access_token, vk_group_id, api_version, file_name)
     if url:
         upload_file_response = upload_comic_file(url, file_name)
         upload_wall_photo_response = upload_file_response.json()
@@ -96,11 +94,10 @@ def upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name):
             return upload_wall_photo_response
                  
 
-def save_wall_photo(vk_access_token, vk_group_id,  api_version, file_name):
+def save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_photo_response):
 
     url = 'https://api.vk.com/method/photos.saveWallPhoto'  
     
-    upload_photo_response = upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name)
     if upload_photo_response:    
         payloads = {
             'access_token': vk_access_token,         
@@ -119,11 +116,9 @@ def save_wall_photo(vk_access_token, vk_group_id,  api_version, file_name):
             return save_wall_photo_response['response']
 
 
-def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, caption):
+def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, caption, save_wall_photo_response):
 
     url = 'https://api.vk.com/method/wall.post'  
-    
-    save_wall_photo_response = save_wall_photo(vk_access_token, vk_group_id, api_version, file_name)
     if save_wall_photo_response:
         owner_id = save_wall_photo_response[0]['owner_id']
         media_id = save_wall_photo_response[0]['id']
@@ -142,6 +137,16 @@ def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, captio
             raise HTTPError(post_wall_photo_response['error']['error_msg']) 
         delete_image_file(file_name)
        
+
+def post_comic_in_vk(vk_access_token, vk_group_id, api_version, file_name, caption):
+
+    upload_vk_server_url = get_upload_vk_server_url(vk_access_token, vk_group_id, api_version)
+    upload_wall_photo_response = upload_wall_photo(file_name, upload_vk_server_url)
+    save_wall_photo_response = save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_wall_photo_response)
+    post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, caption, save_wall_photo_response)
+
+
+
 
 if __name__ == "__main__":
     main()
