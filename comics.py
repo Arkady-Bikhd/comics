@@ -4,6 +4,7 @@ from os import environ
 from pathlib import Path
 from random import randint
 from sys import exit
+from requests.exceptions import HTTPError
 
 
 
@@ -18,9 +19,11 @@ def main():
         comic_caption = download_random_comic()
         try:
             post_wall_photo(vk_access_token, vk_group_id, actual_api_version, file_name, comic_caption)
-        except requests.exceptions.HTTPError:
+        except HTTPError as err:
             print('Ошибка опубликования комикса')
-    except requests.exceptions.HTTPError:
+            print(err.args[0])
+            delete_image_file(file_name)
+    except HTTPError:
         print('Ошибка загрузки комикса')
 
 
@@ -62,17 +65,10 @@ def get_upload_vk_server_url(vk_access_token, vk_group_id, api_version, file_nam
     response.raise_for_status()    
     upload_url_response = response.json()    
     if 'error' in upload_url_response:
-        print_error_msg(upload_url_response, file_name)            
+        raise HTTPError(upload_url_response['error']['error_msg'])          
     else:
         return upload_url_response['response']['upload_url']
         
-
-def print_error_msg(response, file_name):
-    
-    delete_image_file(file_name)
-    print('Ошибка. Описание:')
-    print(response['error']['error_msg'])    
-
 
 def upload_comic_file(url, file_name):
     
@@ -92,9 +88,10 @@ def upload_wall_photo(vk_access_token, vk_group_id, api_version, file_name):
         upload_file_response = upload_comic_file(url, file_name)
         upload_wall_photo_response = upload_file_response.json()
         if 'error' in upload_wall_photo_response:
-            print_error_msg(upload_wall_photo_response, file_name)
+            raise HTTPError(upload_wall_photo_response['error']['error_msg'])  
         elif upload_wall_photo_response['photo'] == '[]':
-            print('Комикс не загружен в группу')        
+            raise HTTPError('Комикс не загружен в группу')  
+            print()        
         else:
             return upload_wall_photo_response
                  
@@ -117,7 +114,7 @@ def save_wall_photo(vk_access_token, vk_group_id,  api_version, file_name):
         response.raise_for_status()
         save_wall_photo_response = response.json()    
         if 'error' in save_wall_photo_response:
-            print_error_msg(save_wall_photo_response, file_name)
+            raise HTTPError(save_wall_photo_response['error']['error_msg']) 
         else:
             return save_wall_photo_response['response']
 
@@ -142,7 +139,7 @@ def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, captio
         response.raise_for_status()
         post_wall_photo_response = response.json()
         if 'error' in post_wall_photo_response:
-            print_error_msg(post_wall_photo_response, file_name)
+            raise HTTPError(post_wall_photo_response['error']['error_msg']) 
         delete_image_file(file_name)
        
 
