@@ -12,12 +12,12 @@ def main():
     load_dotenv()
     vk_access_token = environ['VK_ACCESS_TOKEN']
     vk_group_id = environ['VK_GROUP_ID']
-    actual_version_API = '5.131'
+    actual_version_api = '5.131'
     file_name = 'image.png'
     try:
         comics_caption = download_random_comics()
         try:
-            post_wall_photo(vk_access_token, vk_group_id, actual_version_API, file_name, comics_caption)
+            post_wall_photo(vk_access_token, vk_group_id, actual_version_api, file_name, comics_caption)
         except requests.exceptions.HTTPError:
             print('Ошибка опубликования комикса')
     except requests.exceptions.HTTPError:
@@ -45,13 +45,13 @@ def download_random_comics():
     return comics_caption 
 
 
-def get_upload_vk_server_url(vk_access_token, vk_group_id, version_API, file_name):
+def get_upload_vk_server_url(vk_access_token, vk_group_id, version_api, file_name):
 
     
     url = 'https://api.vk.com/method/photos.getWallUploadServer'
     payloads = {
         'access_token': vk_access_token, 
-        'v': version_API,
+        'v': version_api,
         'group_id': vk_group_id
     }
     response = requests.get(url, params=payloads)
@@ -71,10 +71,10 @@ def print_error_msg(response, file_name):
     exit() 
 
 
-def upload_wall_photos(vk_access_token, vk_group_id, version_API, file_name):
+def upload_wall_photos(vk_access_token, vk_group_id, version_api, file_name):
     
     with open(file_name, 'rb') as file:
-        url = get_upload_vk_server_url(vk_access_token, vk_group_id, version_API, file_name)
+        url = get_upload_vk_server_url(vk_access_token, vk_group_id, version_api, file_name)
         files = {
             'photo': file
         }
@@ -90,17 +90,17 @@ def upload_wall_photos(vk_access_token, vk_group_id, version_API, file_name):
         return response
                  
 
-def save_wall_photo(vk_access_token, vk_group_id,  version_API, file_name):
+def save_wall_photo(vk_access_token, vk_group_id,  version_api, file_name):
 
     url = 'https://api.vk.com/method/photos.saveWallPhoto'  
     
-    response_upload_photo = upload_wall_photos(vk_access_token, vk_group_id, version_API, file_name)    
+    response_upload_photo = upload_wall_photos(vk_access_token, vk_group_id, version_api, file_name)    
     payloads = {
         'access_token': vk_access_token,         
         'group_id': vk_group_id,
         'photo': response_upload_photo['photo'],
         'server': response_upload_photo['server'],
-        'v': version_API,
+        'v': version_api,
         'hash': response_upload_photo['hash']
     }
     response = requests.post(url, params=payloads)
@@ -112,11 +112,11 @@ def save_wall_photo(vk_access_token, vk_group_id,  version_API, file_name):
         return response['response']
 
 
-def post_wall_photo(vk_access_token, vk_group_id, version_API, file_name, caption):
+def post_wall_photo(vk_access_token, vk_group_id, version_api, file_name, caption):
 
     url = 'https://api.vk.com/method/wall.post'  
     
-    response_save_wall_photo = save_wall_photo(vk_access_token, vk_group_id, version_API, file_name)
+    response_save_wall_photo = save_wall_photo(vk_access_token, vk_group_id, version_api, file_name)
     owner_id = response_save_wall_photo[0]['owner_id']
     media_id = response_save_wall_photo[0]['id']
     payloads = {
@@ -125,7 +125,7 @@ def post_wall_photo(vk_access_token, vk_group_id, version_API, file_name, captio
         'from_group': 1,
         'message': caption,
         'attachments': f'photo{owner_id}_{media_id}',        
-        'v': version_API,        
+        'v': version_api,        
     }
     response = requests.post(url, params=payloads)
     response.raise_for_status()
