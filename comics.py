@@ -15,34 +15,34 @@ def main():
     actual_api_version = '5.131'
     file_name = 'image.png'
     try:
-        comics_caption = download_random_comics()
+        comic_caption = download_random_comic()
         try:
-            post_wall_photo(vk_access_token, vk_group_id, actual_api_version, file_name, comics_caption)
+            post_wall_photo(vk_access_token, vk_group_id, actual_api_version, file_name, comic_caption)
         except requests.exceptions.HTTPError:
             print('Ошибка опубликования комикса')
     except requests.exceptions.HTTPError:
         print('Ошибка загрузки комикса')
 
 
-def download_random_comics():
+def download_random_comic():
 
     url = 'https://xkcd.com/info.0.json'
     response = requests.get(url)
     response.raise_for_status()
-    total_comics = response.json()['num']
-    comics_number = randint(1, total_comics)
-    url = f'https://xkcd.com/{comics_number}/info.0.json'
+    total_comic = response.json()['num']
+    comic_number = randint(1, total_comic)
+    url = f'https://xkcd.com/{comic_number}/info.0.json'
     response = requests.get(url)
     response.raise_for_status()  
-    comics_link = response.json()['img']
-    comics_caption = response.json()['alt']
-    response = requests.get(comics_link)
+    comic_link = response.json()['img']
+    comic_caption = response.json()['alt']
+    response = requests.get(comic_link)
     response.raise_for_status()
     file_name = Path().cwd() / 'image.png'    
     with open(file_name, 'wb') as file:
         file.write(response.content)
 
-    return comics_caption 
+    return comic_caption 
 
 
 def delete_image_file(file_name):
