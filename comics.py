@@ -15,15 +15,15 @@ def main():
     file_name = 'image.png'
     try:
         comic_caption = download_random_comic()
-        try:
-            post_comic_in_vk(vk_access_token, vk_group_id, actual_api_version, file_name, comic_caption)
-        except HTTPError as err:
-            print('Ошибка опубликования комикса')
-            print(err.args[0])
-            Path(file_name).unlink() 
     except HTTPError:
         print('Ошибка загрузки комикса')
-
+    try:
+        post_comic_in_vk(vk_access_token, vk_group_id, actual_api_version, file_name, comic_caption)
+    except HTTPError as err:
+        print('Ошибка опубликования комикса')
+        print(err.args[0])
+        Path(file_name).unlink() 
+    
 
 def download_random_comic():
 
