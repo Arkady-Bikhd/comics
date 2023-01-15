@@ -6,7 +6,6 @@ from random import randint
 from requests.exceptions import HTTPError
 
 
-
 def main():
 
     load_dotenv()
@@ -36,15 +35,14 @@ def download_random_comic():
     url = f'https://xkcd.com/{comic_number}/info.0.json'
     response = requests.get(url)
     response.raise_for_status()  
-    comic_link = response.json()['img']
-    comic_caption = response.json()['alt']
-    response = requests.get(comic_link)
+    comic_response = response.json()    
+    response = requests.get(comic_response['img'])
     response.raise_for_status()
     file_name = Path().cwd() / 'image.png'    
     with open(file_name, 'wb') as file:
         file.write(response.content)
 
-    return comic_caption 
+    return comic_response['alt'] 
 
 
 def delete_image_file(file_name):
