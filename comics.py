@@ -59,8 +59,7 @@ def get_upload_vk_server_url(vk_access_token, vk_group_id, api_version):
     upload_url_response = response.json()    
     if 'error' in upload_url_response:
         raise HTTPError(upload_url_response['error']['error_msg'])          
-    else:
-        return upload_url_response['response']['upload_url']
+    return upload_url_response['response']['upload_url']
         
 
 def upload_comic_file(url, file_name):
@@ -82,10 +81,8 @@ def upload_wall_photo(file_name, url):
         if 'error' in upload_wall_photo_response:
             raise HTTPError(upload_wall_photo_response['error']['error_msg'])  
         elif upload_wall_photo_response['photo'] == '[]':
-            raise HTTPError('Комикс не загружен в группу')  
-            print()        
-        else:
-            return upload_wall_photo_response
+            raise HTTPError('Комикс не загружен в группу')                    
+        return upload_wall_photo_response
                  
 
 def save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_photo_response):
@@ -106,8 +103,7 @@ def save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_photo_res
         save_wall_photo_response = response.json()    
         if 'error' in save_wall_photo_response:
             raise HTTPError(save_wall_photo_response['error']['error_msg']) 
-        else:
-            return save_wall_photo_response['response']
+        return save_wall_photo_response['response']
 
 
 def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, caption, save_wall_photo_response):
@@ -129,7 +125,7 @@ def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, captio
         post_wall_photo_response = response.json()
         if 'error' in post_wall_photo_response:
             raise HTTPError(post_wall_photo_response['error']['error_msg']) 
-        delete_image_file(file_name)
+        
        
 
 def post_comic_in_vk(vk_access_token, vk_group_id, api_version, file_name, caption):
