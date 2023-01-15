@@ -20,7 +20,7 @@ def main():
         except HTTPError as err:
             print('Ошибка опубликования комикса')
             print(err.args[0])
-            delete_image_file(file_name)
+            Path(file_name).unlink() 
     except HTTPError:
         print('Ошибка загрузки комикса')
 
@@ -43,10 +43,6 @@ def download_random_comic():
         file.write(response.content)
 
     return comic_response['alt'] 
-
-
-def delete_image_file(file_name):
-    Path(file_name).unlink() 
 
 
 def get_upload_vk_server_url(vk_access_token, vk_group_id, api_version):
@@ -142,6 +138,7 @@ def post_comic_in_vk(vk_access_token, vk_group_id, api_version, file_name, capti
     upload_wall_photo_response = upload_wall_photo(file_name, upload_vk_server_url)
     save_wall_photo_response = save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_wall_photo_response)
     post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, caption, save_wall_photo_response)
+    Path(file_name).unlink() 
 
 
 
