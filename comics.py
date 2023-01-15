@@ -21,8 +21,9 @@ def main():
         post_comic_in_vk(vk_access_token, vk_group_id, actual_api_version, file_name, comic_caption)
     except HTTPError as err:
         print('Ошибка опубликования комикса')
-        print(err.args[0])
-        Path(file_name).unlink() 
+        print(err.args[0])        
+    finally:
+        Path(file_name).unlink()
     
 
 def download_random_comic():
@@ -69,7 +70,7 @@ def upload_comic_file(url, file_name):
                 'photo': file
             }
             response = requests.post(url, files=files)
-    response.raise_for_status()
+    response.raise_for_status()    
     return response
 
 
@@ -125,8 +126,7 @@ def post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, captio
         post_wall_photo_response = response.json()
         if 'error' in post_wall_photo_response:
             raise HTTPError(post_wall_photo_response['error']['error_msg']) 
-        
-       
+               
 
 def post_comic_in_vk(vk_access_token, vk_group_id, api_version, file_name, caption):
 
@@ -134,10 +134,7 @@ def post_comic_in_vk(vk_access_token, vk_group_id, api_version, file_name, capti
     upload_wall_photo_response = upload_wall_photo(file_name, upload_vk_server_url)
     save_wall_photo_response = save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_wall_photo_response)
     post_wall_photo(vk_access_token, vk_group_id, api_version, file_name, caption, save_wall_photo_response)
-    Path(file_name).unlink() 
-
-
-
+    
 
 if __name__ == "__main__":
     main()
