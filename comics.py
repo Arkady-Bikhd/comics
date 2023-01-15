@@ -4,7 +4,7 @@ from os import environ
 from pathlib import Path
 from random import randint
 from requests.exceptions import HTTPError
-from type_annotation import Upload_photo, Save_photo
+from type_annotation import UploadPhoto, SavePhoto
 
 
 def main():
@@ -82,7 +82,7 @@ def upload_wall_photo(file_name, url):
         raise HTTPError(upload_wall_photo_response['error']['error_msg'])  
     elif upload_wall_photo_response['photo'] == '[]':
         raise HTTPError('Комикс не загружен в группу')
-    upload_photo = Upload_photo(
+    upload_photo = UploadPhoto(
         photo=upload_wall_photo_response['photo'],
         server=upload_wall_photo_response['server'],
         hash_wall=upload_wall_photo_response['hash']
@@ -90,7 +90,7 @@ def upload_wall_photo(file_name, url):
     return upload_photo
                  
 
-def save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_photo: Upload_photo):
+def save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_photo: UploadPhoto):
 
     url = 'https://api.vk.com/method/photos.saveWallPhoto'  
     payloads = {
@@ -106,14 +106,14 @@ def save_wall_photo(vk_access_token, vk_group_id,  api_version, upload_photo: Up
     save_wall_photo_response = response.json()    
     if 'error' in save_wall_photo_response:
         raise HTTPError(save_wall_photo_response['error']['error_msg'])
-    save_photo = Save_photo(
+    save_photo = SavePhoto(
         owner_id=save_wall_photo_response['response'][0]['owner_id'],
         media_id=save_wall_photo_response['response'][0]['id']
     ) 
     return save_photo
 
 
-def post_wall_photo(vk_access_token, vk_group_id, api_version, caption, save_photo: Save_photo):
+def post_wall_photo(vk_access_token, vk_group_id, api_version, caption, save_photo: SavePhoto):
 
     url = 'https://api.vk.com/method/wall.post'  
     owner_id = save_photo.owner_id

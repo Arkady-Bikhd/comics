@@ -2,12 +2,12 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Upload_photo:
+class UploadPhoto:
     photo: str
     server: str
     hash_wall: str
 
 @dataclass
-class Save_photo:
+class SavePhoto:
     owner_id: str
     media_id: str
